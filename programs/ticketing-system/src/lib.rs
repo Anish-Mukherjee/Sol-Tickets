@@ -20,6 +20,17 @@ pub mod ticketing_system {
         }
         Ok(())
     }
+
+    pub fn purchase(ctx: Context<PurchaseTicket>, ticket:u32, idx:u32) -> Result<()> {
+        let ticketing_system = &mut ctx.accounts.ticketing_system;
+        let user = &mut ctx.accounts.user;
+        let mut ticket = ticketing_system.ticket_list[idx as usize];
+        ticket.available = false;
+        ticket.owner = *user.to_account_info().key;
+        ticketing_system.ticket_list[idx as usize] = ticket;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -29,6 +40,13 @@ pub struct Initialize<'info>{
     #[account(mut)]
     pub user : Signer<'info>,
     pub system_program : Program<'info,System>,
+}
+
+#[derive(Accounts)]
+pub struct PurchaseTicket<'info>{
+    #[account(mut)]
+    pub ticketing_system: Account<'info, TicketingSystem>,
+    pub user: Signer<'info>,
 }
 
 #[account]
